@@ -1,6 +1,6 @@
 using BloggingEngineApi.Models;
 using BloggingEngineApi.Context;
-using BloggingEngineApi.Interfaces;
+using BloggingEngineApi.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,7 +44,7 @@ namespace BloggingEngineApi.DbRepository
             return blogs;
         }
 
-        public async Task<Blog> CreateBlog(Blog blog)
+        public async Task<Blog> CreateBlogAsync(Blog blog)
         {
             using (var db = new BloggingContext())
             {
@@ -58,7 +58,7 @@ namespace BloggingEngineApi.DbRepository
             }
         }
         
-        public async Task<Blog> UpdateBlog(Blog blog)
+        public async Task<Blog> UpdateBlogAsync(Blog blog)
         {
             using (var db = new BloggingContext())
             {
@@ -72,7 +72,7 @@ namespace BloggingEngineApi.DbRepository
             }
         }
 
-        public async Task<bool> DeleteBlog(int id)
+        public async Task<bool> DeleteBlogAsync(int id)
         {
             using (var db = new BloggingContext())
             {

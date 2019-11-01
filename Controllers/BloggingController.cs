@@ -4,6 +4,7 @@ using BloggingEngineApi.Context;
 using BloggingEngineApi.Models;
 using System.Linq;
 using System.Threading.Tasks;
+using BloggingEngineApi.Repositories;
 using Newtonsoft.Json.Linq;
 
 namespace BloggingEngineApi.Controllers.V1
@@ -13,98 +14,66 @@ namespace BloggingEngineApi.Controllers.V1
     [ApiController]
     public class BloggingController : ControllerBase
     {
+        private readonly IBloggingRepository _bloggingRepository;
+
+        public BloggingController(IBloggingRepository bloggingRepository)
+        {
+            _bloggingRepository = bloggingRepository;
+        }
+
         // GET api/blogging
         [HttpGet]
         public ActionResult<IEnumerable<Blog>> Get()
         {
-            List<Blog> blogs = new List<Blog>();
-
-            using (var db = new BloggingContext())
-            {
-                foreach (var blog in db.Blogs)
-                {
-                    var posts = db.Posts.Where(p => p.BlogId == blog.BlogId);
-                    blog.Posts = posts.ToList();
-                    blogs.Add(blog);
-                }
-            }
-
-            return Ok(blogs);
+            return Ok(_bloggingRepository.GetAllBlogs());
         }
 
         // GET api/blogging/5
         [HttpGet("{id}")]
         public ActionResult<Blog> Get(int id)
         {
-            using (var db = new BloggingContext())
+            Blog blog = _bloggingRepository.GetBlog(id);
+
+            if (blog != null)
             {
-                var blog = db.Blogs.First(b => b.BlogId == id);
-
-                if (blog == null)
-                {
-                    return NotFound();
-                }
-
-                blog.Posts = db.Posts.Where(p => p.BlogId == id).ToList();
-
-                return Ok(blog);
+                return Ok(_bloggingRepository.GetBlog(id));
             }
+
+            return NotFound();
         }
 
         // POST api/blogging
         [HttpPost]
         public async Task<ActionResult<Blog>> Post([FromBody] Blog blog)
         {
-            using (var db = new BloggingContext())
-            {
-                await db.AddAsync(blog);
-                var result = await db.SaveChangesAsync();
-                var newBlog = db.Blogs.First(b => b.BlogId == blog.BlogId);
-                var newPosts = db.Posts.Where(p => p.BlogId == newBlog.BlogId).ToList();
-                newBlog.Posts = newPosts;
-
-                return Created(($"/api/blogging/{0}", blog.BlogId).ToString(), blog);
-            }
+            Blog resultBlog = await _bloggingRepository.CreateBlogAsync(blog);
+            return Created(($"/api/blogging/{0}", resultBlog.BlogId).ToString(), resultBlog);
         }
 
         // PUT api/blogging/5
         [HttpPut("{id}")]
         public async Task<ActionResult<Blog>> Put(int id, [FromBody] Blog blog)
         {
-            using (var db = new BloggingContext())
-            {
-                db.Update(blog);
-                await db.SaveChangesAsync();
-                var updatedBlog = db.Blogs.First(b => b.BlogId == blog.BlogId);
-                var updatedPosts = db.Posts.Where(p => p.BlogId == updatedBlog.BlogId).ToList();
-                updatedBlog.Posts = updatedPosts;
-
-                return Ok(updatedBlog);
-            }
+            Blog updatedBlog = await _bloggingRepository.UpdateBlogAsync(blog);
+            return Ok(updatedBlog);
         }
 
         // DELETE api/blogging/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            using (var db = new BloggingContext())
+            var success = await _bloggingRepository.DeleteBlogAsync(id);
+
+            dynamic jsonResponse = new JObject();
+
+            if (success)
             {
-                var count = db.Blogs.Count(b => b.BlogId == id);
-
-                if (count == 0)
-                {
-                    return NotFound();
-                }
-
-                var blog = db.Blogs.First(b => b.BlogId == id);
-                db.Remove(blog);
-                await db.SaveChangesAsync();
-
-                dynamic jsonResponse = new JObject();
                 jsonResponse.message = string.Format($@"Blog with id {id} successfully deleted.");
-
                 return Ok(jsonResponse);
             }
+
+            jsonResponse.message = string.Format($@"Failed to delete Blog with id {id}.");
+            return BadRequest(jsonResponse);
         }
     }
 }
