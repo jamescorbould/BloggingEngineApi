@@ -23,20 +23,20 @@ namespace BloggingEngineApi.Controllers.V1
 
         // GET api/blogging
         [HttpGet]
-        public ActionResult<IEnumerable<Blog>> Get()
+        public async Task<ActionResult<IEnumerable<Blog>>> GetAsync()
         {
-            return Ok(_bloggingRepository.GetAllBlogs());
+            return Ok(await _bloggingRepository.GetAllBlogsAsync());
         }
 
         // GET api/blogging/5
         [HttpGet("{id}")]
-        public ActionResult<Blog> Get(int id)
+        public async Task<ActionResult<Blog>> GetAsync(int id)
         {
-            Blog blog = _bloggingRepository.GetBlog(id);
+            Blog blog = await _bloggingRepository.GetBlogAsync(id);
 
             if (blog != null)
             {
-                return Ok(_bloggingRepository.GetBlog(id));
+                return Ok(await _bloggingRepository.GetBlogAsync(id));
             }
 
             return NotFound();
@@ -44,7 +44,7 @@ namespace BloggingEngineApi.Controllers.V1
 
         // POST api/blogging
         [HttpPost]
-        public async Task<ActionResult<Blog>> Post([FromBody] Blog blog)
+        public async Task<ActionResult<Blog>> PostAsync([FromBody] Blog blog)
         {
             Blog resultBlog = await _bloggingRepository.CreateBlogAsync(blog);
             return Created(($"/api/blogging/{0}", resultBlog.BlogId).ToString(), resultBlog);
@@ -52,7 +52,7 @@ namespace BloggingEngineApi.Controllers.V1
 
         // PUT api/blogging/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Blog>> Put(int id, [FromBody] Blog blog)
+        public async Task<ActionResult<Blog>> PutAsync(int id, [FromBody] Blog blog)
         {
             Blog updatedBlog = await _bloggingRepository.UpdateBlogAsync(blog);
             return Ok(updatedBlog);
@@ -60,7 +60,7 @@ namespace BloggingEngineApi.Controllers.V1
 
         // DELETE api/blogging/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult<string>> DeleteAsync(int id)
         {
             var success = await _bloggingRepository.DeleteBlogAsync(id);
 

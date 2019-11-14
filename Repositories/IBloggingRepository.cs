@@ -6,8 +6,8 @@ namespace BloggingEngineApi.Repositories
 {
     public interface IBloggingRepository
     {
-        Blog GetBlog(int id);
-        List<Blog> GetAllBlogs();
+        Task<Blog> GetBlogAsync(int id);
+        Task<List<Blog>> GetAllBlogsAsync();
         Task<Blog> CreateBlogAsync(Blog blog);
         Task<Blog> UpdateBlogAsync(Blog blog);
         Task<bool> DeleteBlogAsync(int id);
