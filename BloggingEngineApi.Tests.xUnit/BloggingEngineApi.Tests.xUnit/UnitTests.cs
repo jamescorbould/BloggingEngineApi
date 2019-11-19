@@ -41,6 +41,7 @@ namespace BloggingEngineApi.Tests.xUnit
             var bloggingController = new BloggingController(repositoryMock.Object);
             var actualResponse = await bloggingController.GetAsync(1);
             var expectedResponse = new ActionResult<Blog>(new OkObjectResult(blogMock));
+
             Assert.Equal(expectedResponse.Value, actualResponse.Value);
         }
 
@@ -90,6 +91,7 @@ namespace BloggingEngineApi.Tests.xUnit
             var bloggingController = new BloggingController(repositoryMock.Object);
             var actualResponse = await bloggingController.GetAsync();
             var expectedResponse = new ActionResult<List<Blog>>(new OkObjectResult(blogMocks));
+
             Assert.Equal(expectedResponse.Value, actualResponse.Value);
         }
 
@@ -109,6 +111,68 @@ namespace BloggingEngineApi.Tests.xUnit
             var expectedResponse = new ActionResult<string>(new OkObjectResult(jsonResponseMock));
 
             Assert.Equal(expectedResponse.Value, response.Value);
+        }
+
+        [Fact]
+        public async void Update_Blog_Mock_By_Id_Async()
+        {
+            var repositoryMock = new Mock<IBloggingRepository>();
+
+            var blogMock = new Blog()
+            {
+                BlogId = 1,
+                Name = "Corbs Blog",
+                Posts = new List<Post>()
+                {
+                    new Post()
+                    {
+                        BlogId = 1,
+                        Content = "ipso facto",
+                        PostId = 1,
+                        Title = "Post for this blog"
+                    }
+                },
+                Url = "test.com"
+            };
+
+            repositoryMock.Setup(x => x.UpdateBlogAsync(blogMock)).ReturnsAsync(blogMock);
+
+            var bloggingController = new BloggingController(repositoryMock.Object);
+            var actualResponse = await bloggingController.PutAsync(1, blogMock);
+            var expectedResponse = new ActionResult<Blog>(new OkObjectResult(blogMock));
+
+            Assert.Equal(expectedResponse.Value, actualResponse.Value);
+        }
+
+        [Fact]
+        public async void Create_Blog_Mock_By_Id_Async()
+        {
+            var repositoryMock = new Mock<IBloggingRepository>();
+
+            var blogMock = new Blog()
+            {
+                BlogId = 1,
+                Name = "Corbs Blog",
+                Posts = new List<Post>()
+                {
+                    new Post()
+                    {
+                        BlogId = 1,
+                        Content = "ipso facto",
+                        PostId = 1,
+                        Title = "Post for this blog"
+                    }
+                },
+                Url = "test.com"
+            };
+
+            repositoryMock.Setup(x => x.CreateBlogAsync(blogMock)).ReturnsAsync(blogMock);
+
+            var bloggingController = new BloggingController(repositoryMock.Object);
+            var actualResponse = await bloggingController.PostAsync(blogMock);
+            var expectedResponse = new ActionResult<Blog>(new CreatedResult($"/api/blogging/1", blogMock));
+
+            Assert.Equal(expectedResponse.Value, actualResponse.Value);
         }
     }
 }
