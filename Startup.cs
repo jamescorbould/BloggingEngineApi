@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using BloggingEngineApi.DbRepository;
+using BloggingEngineApi.Repositories;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Operations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
@@ -31,6 +34,9 @@ namespace BloggingEngineApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Blogging API", Version = "v1" });
             });
+
+            // Add db repository to the .NET Core's IOC container.
+            services.AddSingleton<IBloggingRepository, BloggingDbRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
